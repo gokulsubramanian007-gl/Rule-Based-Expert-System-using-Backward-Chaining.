@@ -1,0 +1,124 @@
+# Rule-Based Expert System using Backward Chaining
+# Student Academic Guidance
+
+# -----------------------------
+# Facts about the student
+# -----------------------------
+
+facts = {
+    "GoodAttendance",
+    "HighMarks",
+    "RegularStudy",
+    "CompletedAssignments"
+}
+
+
+# -----------------------------
+# Rules for Academic Guidance
+# -----------------------------
+
+rules = [
+    ("EligibleForPlacement", ["GoodAcademicPerformance", "GoodAttendance"]),
+    ("GoodAcademicPerformance", ["HighMarks", "RegularStudy"]),
+    ("GoodAcademicPerformance", ["HighMarks", "CompletedAssignments"]),
+    ("NeedsExtraPractice", ["LowMarks", "IrregularStudy"])
+]
+
+
+# -----------------------------
+# Backward Chaining Function
+# -----------------------------
+
+def backward_chaining(goal, facts, rules, steps, visited=None):
+
+    if visited is None:
+        visited = set()
+
+    # If goal is already a known fact
+    if goal in facts:
+        steps.append(f"Fact found: {goal}")
+        return True
+
+    # Avoid checking the same goal repeatedly
+    if goal in visited:
+        return False
+
+    visited.add(goal)
+
+    # Find rules that can prove the goal
+    for conclusion, conditions in rules:
+
+        if conclusion == goal:
+            steps.append(
+                f"Trying rule: {conclusion} <- {', '.join(conditions)}"
+            )
+
+            all_conditions_true = True
+
+            # Try to prove every condition
+            for condition in conditions:
+
+                steps.append(f"Checking condition: {condition}")
+
+                if not backward_chaining(
+                    condition, facts, rules, steps, visited
+                ):
+                    steps.append(
+                        f"Cannot prove: {condition}"
+                    )
+                    all_conditions_true = False
+                    break
+
+            if all_conditions_true:
+                steps.append(
+                    f"Rule satisfied. Therefore, {goal} is TRUE."
+                )
+                return True
+
+    steps.append(f"No rule can prove: {goal}")
+    return False
+
+
+# -----------------------------
+# Select the Goal
+# -----------------------------
+
+goal = "EligibleForPlacement"
+
+steps = []
+
+# Perform backward chaining
+result = backward_chaining(goal, facts, rules, steps)
+
+
+# -----------------------------
+# Display Reasoning Steps
+# -----------------------------
+
+print("STUDENT ACADEMIC GUIDANCE")
+print("=" * 40)
+
+print("\nFacts:")
+for fact in facts:
+    print("-", fact)
+
+print("\nSelected Goal:")
+print("-", goal)
+
+print("\nReasoning Steps:")
+print("-" * 40)
+
+for step in steps:
+    print(step)
+
+# -----------------------------
+# Final Conclusion
+# -----------------------------
+
+print("\nFinal Conclusion:")
+print("-" * 40)
+
+if result:
+    print(f"The student is {goal}.")
+else:
+    print(f"The student is NOT {goal}.")
